@@ -1,0 +1,54 @@
+#! /bin/sh
+
+picom &
+
+sxhkd &
+
+~/.config/polybar/run.sh &
+
+~/.config/polybar/scripts/soundcard_dector &
+
+~/.fehbg &
+
+~/.config/bspwm/bspwm_workspaces.sh &
+
+dunst --config ~/.config/dunst/dunstrc &
+
+xsetroot -cursor_name left_ptr &
+
+sudo rmmod pcspkr
+
+numlockx &
+
+autorandr -c
+
+# create workspaces
+#bspc monitor -d 1 2 3 4 5 6
+#if type "xrandr"; then
+#  for m in $(xrandr --query | grep " connected" | cut -d" " -f1); do
+#    bspc monitor $m -d 1 2 3 4 5 6
+#  done
+#else
+#  bspc monitor -d 1 2 3 4 5 6
+#fi
+
+ if [ "$(xrandr --query | grep '\bconnected' | wc -l)" -eq "3" ]; then
+   bspc monitor $(xrandr --query | grep '\bconnected' | sed -n 1p | sed 's/ .*//') -d 1 2 3
+   bspc monitor $(xrandr --query | grep '\bconnected' | sed -n 2p | sed 's/ .*//') -d 4 5 6
+   bspc monitor $(xrandr --query | grep '\bconnected' | sed -n 3p | sed 's/ .*//') -d 7 8 9
+ elif [ "$(xrandr --query | grep '\bconnected' | wc -l)" -eq "2" ]; then
+   bspc monitor $(xrandr --query | grep '\bconnected' | sed -n 1p | sed 's/ .*//') -d 1 2 3 4 5
+   bspc monitor $(xrandr --query | grep '\bconnected' | sed -n 2p | sed 's/ .*//') -d 6 7 8 9
+ else
+   bspc monitor -d 1 2 3 4 5 6 7 8 9
+ fi
+
+# window gaps and width
+bspc config border_width          0
+bspc config window_gap            12
+
+# window splitting rule
+bspc config split_ratio           0.5
+bspc config borderless_monocle    true
+bspc config gapless_monocle       true
+bspc config focus_follows_pointer true
