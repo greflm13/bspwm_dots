@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cp -rf config/* /home/$USER/.config/
-cp -rf .* /home/$USER/
+rsync -av --progress config/* /home/$USER/.config/
+rsync -av --progress .??* /home/$USER/ --exclude .git
