@@ -2,3 +2,4 @@
 
 rsync -av --progress config/* /home/$USER/.config/
 rsync -av --progress .??* /home/$USER/ --exclude .git
+xrdb -merge ~/.Xresources
