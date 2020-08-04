@@ -5,19 +5,36 @@
 Fore everything to work, you'll need the following:
 
 `autorandr`
+
 `betterlockscreen`
+
 `bspwm`
+
 `dmenu`
+
 `dunst`
+
 `feh`
+
 `flameshot`
+
+`jshon`
+
 `networkmanager-dmenu`
+
 `numlockx`
+
 `picom`
+
+`playerctl`
+
 `polybar`
+
 `rofi`
-`spotifyctl`
+
 `spotify-listener`
+
 `sxhkd`
+
 `xterm`
 
