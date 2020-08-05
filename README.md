@@ -14,6 +14,8 @@ Fore everything to work, you'll need the following:
 
 `dunst`
 
+`dunstify`
+
 `feh`
 
 `flameshot`
