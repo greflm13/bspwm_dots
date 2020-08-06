@@ -17,7 +17,7 @@ super + shift + {b,e,m,v,t}
     {firefox-bin,xterm -e ranger,xterm -e ncmpcpp,xterm -e vim,xterm -e rtorrent}
 
 super + e
-	polo-gtk
+    nemo
 
 # scripts
 super + shift + r
@@ -37,15 +37,15 @@ XF86MonBrightness{Up,Down}
 
 # media keys
 XF86Audio{Next,Prev,Play,Stop}
-    /home/user/.local/bin/sp {next,prev,play,pause}
+    playerctl {next,previous,play-pause,pause}
 
 # volume
 XF86AudioRaiseVolume
-    amixer -q sset 'Master' 2%+
+    amixer -q sset 'Master' 2%+ && dunstify "Volume: $(~/.config/sxhkd/volume)" -t 500 -r 1
 XF86AudioLowerVolume
-    amixer -q sset 'Master' 2%-
+    amixer -q sset 'Master' 2%- && dunstify "Volume: $(~/.config/sxhkd/volume)" -t 500 -r 1
 XF86AudioMute
-    amixer -q sset Master toggle 
+    amixer -q sset 'Master' toggle && dunstify $(if [ "$(~/.config/sxhkd/mute)" == "yes" ]; then echo "Muted!"; else echo "Unmuted!"; fi) -t 500 -r 1
 
 # screenshot keybindings
 Print
@@ -128,7 +128,7 @@ super + bracket{left,right}
 	bspc desktop -f {prev,next}.local
 
 # focus the last node/desktop
-super + {grave,Tab}
+super + {grave,T0ab}
 	bspc {node,desktop} -f last
 
 # focus the older or newer node in the focus history
@@ -141,6 +141,25 @@ super + {o,i}
 super + {_,shift + }{1-9,0}
 	bspc {desktop -f,node -d} '^{1-9,10}'
 
+# send focused node to next or previous desktop
+super + ctrl + shift + {KP_Add,KP_Subtract}
+	bspc node -d {next,prev} --follow
+
+# send focused node to monitor
+super + ctrl + shift + {Left,Down,Up,Right}
+	bspc node -m {west,south,north,east} --follow
+
+# send focused node in the given direction
+super + ctrl + {Left,Down,Up,Right}
+	bspc node -n {west,south,north,east} --follow
+
+# swap node in the given direction
+super + alt + {Left,Down,Up,Right}
+	bspc node -s {west,south,north,east} --follow
+
+# switch focus to last node
+alt + Tab
+	bspc node -f last
 #
 # preselect
 #
@@ -179,4 +198,7 @@ super + {Left,Down,Up,Right}
 
 # lockscreen
 alt + shift + x
-	betterlockscreen -l dim
+	betterlockscreen -l
+
+alt + shift + Escape
+	systemctl poweroff

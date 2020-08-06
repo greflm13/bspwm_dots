@@ -34,8 +34,6 @@ Fore everything to work, you'll need the following:
 
 `rofi`
 
-`spotify-listener`
-
 `sxhkd`
 
 `xterm`

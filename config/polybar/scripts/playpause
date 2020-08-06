@@ -1,0 +1,13 @@
+#!/bin/sh
+pause=""
+play=""
+
+while true; do
+        if [[ $(playerctl status) == "Playing" ]]; then
+		echo "$play" > ~/.config/polybar/scripts/playpause.txt ; sleep 2s
+        elif [[ $(playerctl status) == "Paused" ]]; then
+                echo "$pause" > ~/.config/polybar/scripts/playpause.txt ; sleep 2s
+	else
+	  	echo "" > ~/.config/polybar/scripts/playpause.txt ; sleep 2s
+	fi
+done              
