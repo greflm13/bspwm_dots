@@ -1,5 +1,5 @@
 #!/bin/sh
 while true; do
 	metadata="$(playerctl metadata artist): $(playerctl metadata title)"
-	echo "$metadata" > ~/.config/polybar/scripts/metadata.txt ; sleep 2s
+	sed -i "1 c $metadata" ~/.config/polybar/scripts/metadata.txt ; sleep 0.5s
 done

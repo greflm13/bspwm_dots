@@ -11,6 +11,7 @@ done
 
 if ! [ -f "./missing" ]; then
     echo all dependencies met
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     rsync -av --progress config/* /home/$USER/.config/
     rsync -av --progress .??* /home/$USER/ --exclude .git
     xrdb -merge ~/.Xresources
