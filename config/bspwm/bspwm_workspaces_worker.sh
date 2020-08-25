@@ -24,7 +24,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
             bspc desktop Desktop -r
         done
         for MONITOR in $(bspc query -M); do
-            bspc query -m $MONITOR -T | jshon -e desktops -a -e name -u | sort -n | xargs bspc monitor $MONITOR -o
+            bspc query -m $MONITOR -T | jq -r .desktops[].name | sort -n | xargs bspc monitor $MONITOR -o
         done
         
         elif [ "$(xrandr --query | grep '\bconnected' | wc -l)" -eq "3" ]; then
@@ -47,7 +47,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
             bspc desktop Desktop -r
         done
         for MONITOR in $(bspc query -M); do
-            bspc query -m $MONITOR -T | jshon -e desktops -a -e name -u | sort -n | xargs bspc monitor $MONITOR -o
+            bspc query -m $MONITOR -T | jq -r .desktops[].name | sort -n | xargs bspc monitor $MONITOR -o
         done
         
         elif [ "$(xrandr --query | grep '\bconnected' | wc -l)" -eq "2" ]; then
@@ -67,7 +67,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
             bspc desktop Desktop -r
         done
         for MONITOR in $(bspc query -M); do
-            bspc query -m $MONITOR -T | jshon -e desktops -a -e name -u | sort -n | xargs bspc monitor $MONITOR -o
+            bspc query -m $MONITOR -T | jq -r .desktops[].name | sort -n | xargs bspc monitor $MONITOR -o
         done
         
     else
@@ -84,7 +84,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
             bspc desktop Desktop -r
         done
         for MONITOR in $(bspc query -M); do
-            bspc query -m $MONITOR -T | jshon -e desktops -a -e name -u | sort -n | xargs bspc monitor $MONITOR -o
+            bspc query -m $MONITOR -T | jq -r .desktops[].name | sort -n | xargs bspc monitor $MONITOR -o
         done
     fi
     ~/.config/bspwm/lockscreen &

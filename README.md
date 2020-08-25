@@ -20,7 +20,7 @@ Fore everything to work, you'll need the following:
 
 `flameshot`
 
-`jshon`
+`jq`
 
 `networkmanager-dmenu`
 
