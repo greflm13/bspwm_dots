@@ -2,7 +2,7 @@
 echo "checking if all dependencies are installed..."
 echo ""
 rm -f ./missing
-for PROG in {autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,picom,playerctl,polybar,rofi,sxhkd,xterm}; do
+for PROG in {autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,pactl,picom,playerctl,polybar,rofi,sxhkd,xterm}; do
     if ! command -v $PROG >/dev/null
     then
         echo $PROG >> ./missing
