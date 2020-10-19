@@ -96,8 +96,8 @@ super + {t,alt + t,s,f}
 	tiling={tiled,pseudo_tiled,floating,fullscreen} &&  bspc node -t $tiling && dunstify "Window $tiling" -t 1000 -r 5
 
 # set the node flags
-super + ctrl + {m,x,y,z}
-	bspc node -g {marked,locked,sticky,private}
+super + ctrl + {m,x,y,z,h}
+	bspc node -g {marked,locked,sticky,private,hidden}
 
 #
 # focus/swap
@@ -160,25 +160,6 @@ super + alt + {Left,Down,Up,Right}
 # switch focus to last node
 alt + Tab
 	bspc node -f last
-#
-# preselect
-#
-
-# preselect the direction
-super + ctrl + {h,j,k,l}
-	bspc node -p {west,south,north,east}
-
-# preselect the ratio
-super + ctrl + {1-9}
-	bspc node -o 0.{1-9}
-
-# cancel the preselection for the focused node
-super + ctrl + space
-	bspc node -p cancel
-
-# cancel the preselection for the focused desktop
-super + ctrl + shift + space
-	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
 
 #
 # move/resize
