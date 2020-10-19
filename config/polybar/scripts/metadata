@@ -1,5 +1,12 @@
 #!/bin/sh
+if [[ $(ps -eaf | grep [.]config/polybar/scripts/metadata | awk '{print $2}' | wc -l) -ne 2 ]]; then
+	exit 0
+fi
+
+
 while true; do
 	metadata="$(playerctl metadata artist): $(playerctl metadata title)"
-	sed -i "1 c $metadata" ~/.config/polybar/scripts/metadata.txt ; sleep 0.5s
+    if [[ $(< ~/.config/polybar/scripts/metadata.txt) != "$metadata" ]]; then
+		sed -i "1 c $metadata" ~/.config/polybar/scripts/metadata.txt ; sleep 0.5s
+	fi
 done
