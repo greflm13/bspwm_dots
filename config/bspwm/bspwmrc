@@ -10,8 +10,6 @@ sxhkd &
 
 ~/.fehbg &
 
-~/.config/bspwm/bspwm_workspaces.sh &
-
 dunst --config ~/.config/dunst/dunstrc &
 
 xsetroot -cursor_name left_ptr &
@@ -39,6 +37,8 @@ else
 fi
 
 ~/.config/bspwm/lockscreen &
+
+~/.config/bspwm/bspwm_workspaces.sh &
 
 # window gaps and width
 bspc config border_width          0

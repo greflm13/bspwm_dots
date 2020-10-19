@@ -7,6 +7,6 @@ fi
 while true; do
 	metadata="$(playerctl metadata artist): $(playerctl metadata title)"
     if [[ $(< ~/.config/polybar/scripts/metadata.txt) != "$metadata" ]]; then
-		sed -i "1 c $metadata" ~/.config/polybar/scripts/metadata.txt ; sleep 0.5s
+		sed -i "1 c $metadata" ~/.config/polybar/scripts/metadata.txt ; sleep 1s
 	fi
 done
