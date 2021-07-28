@@ -2,7 +2,7 @@
 echo "checking if all dependencies are installed..."
 echo ""
 rm -f ./missing
-for PROG in {autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,pactl,picom,playerctl,polybar,rofi,sxhkd,xterm}; do
+for PROG in {scp,autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,pactl,picom,playerctl,polybar,rofi,sxhkd,xterm,rsync}; do
     if ! command -v $PROG >/dev/null
     then
         echo $PROG >> ./missing
@@ -11,10 +11,23 @@ done
 
 if ! [ -f "./missing" ]; then
     echo all dependencies met
+    echo "overwrite .bashrc? [Y/n]"
+    / while true
+    do
+      read answer
+      if [[ $answer == "n" ]]; then
+        break
+      elif [[ $answer == "y" || $answer == "" ]]; then
+          scp .bashrc $HOME/.bashrc
+      fi
+    done
     curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     rsync -av --progress config/* /home/$USER/.config/
     rsync -av --progress .??* /home/$USER/ --exclude .git
     xrdb -merge ~/.Xresources
+    mkdir -p $HOME/Pictures/Wallpaper
+    cp Wallpaper/linux.png $HOME/Pictures/Wallpaper/linux.png
+    feh --bg-fill '$HOME/Pictures/Wallpaper/linux.png'
 else
     echo "Missing dependencies: "
     while read -r line; do

@@ -9,9 +9,9 @@ super + KP_Enter
 	xterm
 
 # program launcher
-super + @space
-    dmenu_run -nb '#08090c' -nf '#f6f6f6' -sb '#181a1f' -sf '#f6f6f6' 
-
+super + space
+    j4-dmenu-desktop --dmenu="dmenu_run -i -nb '#08090c' -nf '#f6f6f6' -sb '#181a1f' -sf '#f6f6f6'" --use-xdg-de
+    
 # apps
 super + shift + {b,e,m,v,t}
     {firefox-bin,xterm -e ranger,xterm -e ncmpcpp,xterm -e vim,xterm -e rtorrent}
@@ -45,7 +45,7 @@ XF86AudioRaiseVolume
 XF86AudioLowerVolume
     amixer -q sset 'Master' 2%- && dunstify "Volume: $(~/.config/sxhkd/volume)" -t 500 -r 1
 XF86AudioMute
-    amixer -q sset 'Master' toggle && dunstify $(if [ "$(~/.config/sxhkd/mute)" == "yes" ]; then echo "Muted!"; else echo "Unmuted!"; fi) -t 500 -r 1
+    amixer -q sset 'Master' toggle && dunstify $(if [ "$(~/.config/sxhkd/mute)" == "off" ]; then echo "Muted!"; else echo "Unmuted!"; fi) -t 500 -r 1
 
 # screenshot keybindings
 Print
@@ -111,6 +111,9 @@ super + shift + KP_Add
 super + shift + KP_Subtract
 	bspc desktop -f prev
 
+super + shift + F{1,2,3,4,5,6,7,8,9,10,11,12}
+  bspc desktop -f {1,2,3,4,5,6,7,8,9,10,11,12}
+
 # focus the node in the given direction
 super + {_,shift + }{KP_4,KP_2,KP_8,KP_6}
 	bspc node -{f,s} {west,south,north,east}
@@ -160,6 +163,25 @@ super + alt + {Left,Down,Up,Right}
 # switch focus to last node
 alt + Tab
 	bspc node -f last
+#
+# preselect
+#
+
+# preselect the direction
+#super + ctrl + {h,j,k,l}
+#	bspc node -p {west,south,north,east}
+
+# preselect the ratio
+super + ctrl + {1-9}
+	bspc node -o 0.{1-9}
+
+# cancel the preselection for the focused node
+super + ctrl + space
+	bspc node -p cancel
+
+# cancel the preselection for the focused desktop
+super + ctrl + shift + space
+	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
 
 #
 # move/resize
