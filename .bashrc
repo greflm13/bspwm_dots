@@ -168,7 +168,6 @@ if ${use_color} ; then
 	alias ll='ls -hall'
 	alias fuck='sudo $(fc -ln -1)'
 	alias please='sudo'
-	alias yay='sudo dnf update -y; flatpak update -y'
 	alias uwu='uwuify'
 else
 	if [[ ${EUID} == 0 ]] ; then
