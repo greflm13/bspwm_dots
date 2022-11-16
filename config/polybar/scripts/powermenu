@@ -3,10 +3,10 @@
 ## Created By Aditya Shakya
 
 #MENU="$(rofi -sep "|" -dmenu -i -p 'System' -location 5 -xoffset -14 -yoffset -52 -width 10 -hide-scrollbar -line-padding 4 -padding 20 -lines 4 <<< " Lock| Logout| Reboot| Shutdown")"
-MENU="$(rofi -sep "|" -dmenu -i -p 'System' -location 5 -xoffset -14 -yoffset -52 -width 10 -hide-scrollbar -line-padding 4 -padding 20 -lines 4 <<< " Lock| Logout| Reboot| Shutdown")"
+MENU="$(echo -e " Lock\n Logout\n Reboot\n Shutdown" | dmenu -i -nb '#08090c' -nf '#f6f6f6' -sb '#3e4451' -sf '#f6f6f6' -p Menu -l 4)"
             case "$MENU" in
                 *Lock) betterlockscreen -l dim;;
-                *Logout) bspc quit;;
-                *Reboot) systemctl reboot ;;
-                *Shutdown) systemctl -i poweroff
+                *Logout) echo "" > .config/bspwm/lockscreenqueue; echo "" > .config/bspwm/lockscreenlock; bspc quit;;
+                *Reboot) echo "" > .config/bspwm/lockscreenqueue; echo "" > .config/bspwm/lockscreenlock; systemctl reboot ;;
+                *Shutdown) echo "" > .config/bspwm/lockscreenqueue; echo "" > .config/bspwm/lockscreenlock; systemctl -i poweroff
             esac

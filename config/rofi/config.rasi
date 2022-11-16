@@ -1,9 +1,9 @@
 * {
-    active-background: #181a1f;
+    active-background: #3e4451;
     active-foreground: @foreground;
     normal-background: @background;
     normal-foreground: @foreground;
-    urgent-background: #181a1f;
+    urgent-background: #3e4451;
     urgent-foreground: @foreground;
 
     alternate-active-background: @background;
@@ -13,11 +13,11 @@
     alternate-urgent-background: @background;
     alternate-urgent-foreground: @foreground;
 
-    selected-active-background: #181a1f;
+    selected-active-background: #3e4451;
     selected-active-foreground: @foreground;
-    selected-normal-background: #181a1f;
+    selected-normal-background: #3e4451;
     selected-normal-foreground: @foreground;
-    selected-urgent-background: #181a1f;
+    selected-urgent-background: #3e4451;
     selected-urgent-foreground: @foreground;
 
     background-color: @background;
@@ -64,8 +64,9 @@
     border: 2px 0px 0px;
     border-color: @border-color;
     spacing: 2px;
-    scrollbar: true;
+    scrollbar: false;
     padding: 2px 0px 0px;
+    columns: 2;
 }
 
 #element {
@@ -119,9 +120,9 @@
 }
 
 #scrollbar {
-    width: 4px;
+    width: 0px;
     border: 0;
-    handle-width: 8px;
+    handle-width: 0px;
     padding: 0;
 }
 

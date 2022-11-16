@@ -2,34 +2,50 @@
 echo "checking if all dependencies are installed..."
 echo ""
 rm -f ./missing
-for PROG in {scp,autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,pactl,picom,playerctl,polybar,rofi,sxhkd,xterm,rsync}; do
-    if ! command -v $PROG >/dev/null
-    then
-        echo $PROG >> ./missing
+for PROG in {scp,autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,picom,playerctl,polybar,sxhkd,xterm,rsync,j4-dmenu-desktop,blugon,pipewire,bluetoothctl,brightnessctl,fswatch}; do
+    if ! command -v "$PROG" >/dev/null; then
+        echo "$PROG" >>./missing
     fi
 done
 
 if ! [ -f "./missing" ]; then
     echo all dependencies met
     echo "overwrite .bashrc? [Y/n]"
-    while true
-    do
-      read answer
-      if [[ $answer == "n" ]]; then
-        break
-      elif [[ $answer == "y" || $answer == "" ]]; then
-          scp .bashrc $HOME/.bashrc
-          git clone https://github.com/chris-marsh/pureline.git $HOME/pureline
-          scp .pureline.conf $HOME/.pureline.conf
-      fi
+    while true; do
+        read -r answer
+        if [[ $answer == "y" || $answer == "Y" || $answer == "" ]]; then
+            scp "${HOME}"/.bashrc "${HOME}"/.bashrc.old
+            scp .bashrc "${HOME}"/.bashrc
+            scp .colorscripts "${HOME}"/.colorscripts
+            rm -rf "${HOME}"/pureline
+            git clone https://github.com/chris-marsh/pureline.git "${HOME}"/pureline
+            scp "${HOME}"/pureline/configs/powerline_full_256col.conf "${HOME}"/.pureline.conf
+            break
+        else
+            break
+        fi
     done
-    curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    rsync -av --progress config/* /home/$USER/.config/
-    rsync -av --progress .??* /home/$USER/ --exclude .git
+    echo "set wallpaper? [Y/n]"
+    while true; do
+        read -r answer
+        if [[ $answer == "y" || $answer == "Y" || $answer == "" ]]; then
+            mkdir -p "${HOME}"/Pictures/Wallpaper
+            cp Wallpaper/bspwm.png "${HOME}"/Pictures/Wallpaper/bspwm.png
+            feh --bg-fill "${HOME}"/Pictures/Wallpaper/bspwm.png
+            break
+        else
+            break
+        fi
+    done
+    rsync -a config/* "${HOME}"/.config/
+    rsync -a .??* "${HOME}"/ --exclude .git --exclude .bashrc --exclude .colorscripts
+    mkdir -P "${HOME}"/Pictures/Screenshots
+    mkdir -p "${HOME}"/.local/share/fonts
+    scp fonts/*.ttf "${HOME}"/.local/share/fonts/
+    fc-cache -f
+    xrdb -remove
     xrdb -merge ~/.Xresources
-    mkdir -p $HOME/Pictures/Wallpaper
-    cp Wallpaper/linux.png $HOME/Pictures/Wallpaper/linux.png
-    feh --bg-fill ${HOME}/Pictures/Wallpaper/linux.png
+    echo ""
     echo "Choose Polybar accent color:"
     echo -e "\x1b[48;2;20;21;26m                                          \x1b[0m"
     echo -e "\x1b[48;2;20;21;26m   1      2      3      4      5      6   \e[m"
@@ -42,72 +58,78 @@ if ! [ -f "./missing" ]; then
     echo -e "\x1b[48;2;140;12;0m       \x1b[48;2;137;175;109m       \x1b[48;2;206;148;31m       \x1b[48;2;59;76;111m       \x1b[48;2;178;108;199m       \x1b[48;2;77;164;175m       \x1b[0m"
     echo ""
     color=""
-    while [[ $color == "" ]]
-    do
-        read choice
+    while [[ $color == "" ]]; do
+        read -r choice
         case $choice in
-            "1")
-                color=e53947
-                ;;
-            "2")
-                color=74e000
-                ;;
-            "3")
-                color=e5c33e
-                ;;
-            "4")
-                color=4a7de5
-                ;;
-            "5")
-                color=ce3be5
-                ;;
-            "6")
-                color=16bcce
-                ;;
-            "7")
-                color=af3a32
-                ;;
-            "8")
-                color=64c20c
-                ;;
-            "9")
-                color=e5d083
-                ;;
-            "10")
-                color=579dd7
-                ;;
-            "11")
-                color=cc67b9
-                ;;
-            "12")
-                color=5fd3de
-                ;;
-            "13")
-                color=7e0b00
-                ;;
-            "14")
-                color=7b9d62
-                ;;
-            "15")
-                color=b9851c
-                ;;
-            "16")
-                color=354464
-                ;;
-            "17")
-                color=a061b3
-                ;;
-            "18")
-                color=45949d
-                ;;
-            *)
-                ;; 
+        "1")
+            color=e53947
+            ;;
+        "2")
+            color=74e000
+            ;;
+        "3")
+            color=e5c33e
+            ;;
+        "4")
+            color=4a7de5
+            ;;
+        "5")
+            color=ce3be5
+            ;;
+        "6")
+            color=16bcce
+            ;;
+        "7")
+            color=af3a32
+            ;;
+        "8")
+            color=64c20c
+            ;;
+        "9")
+            color=e5d083
+            ;;
+        "10")
+            color=579dd7
+            ;;
+        "11")
+            color=cc67b9
+            ;;
+        "12")
+            color=5fd3de
+            ;;
+        "13")
+            color=7e0b00
+            ;;
+        "14")
+            color=7b9d62
+            ;;
+        "15")
+            color=b9851c
+            ;;
+        "16")
+            color=354464
+            ;;
+        "17")
+            color=a061b3
+            ;;
+        "18")
+            color=45949d
+            ;;
+        *) ;;
+
         esac
     done
-   sed -i "s/^ac\s.*/ac = #${color}/g" /home/$USER/.config/polybar/colors.ini 
+    sed -i "s/^ac\s.*/ac = #${color}/g" "${HOME}"/.config/polybar/colors.ini
+    sed -i "s/^drawColor=.*/drawColor=#${color}/g" "${HOME}"/.config/flameshot/flameshot.ini
+    sed -i "s/^uiColor=.*/uiColor=#${color}/g" "${HOME}"/.config/flameshot/flameshot.ini
+    sed -i "s/^\s*frame_color = .*/    frame_color = \"#${color}\"/g" "${HOME}"/.config/dunst/dunstrc
+    sed -i "s/^thermal-zone = .*/thermal-zone = $(for i in /sys/class/thermal/thermal_zone*; do echo "$i: $(<"$i"/type)"; done | grep pkg_temp | sed 's/\/sys\/class\/thermal\/thermal_zone\(.*\):.*/\1/g')/g" "${HOME}"/.config/polybar/modules.ini
+    echo ""
+    echo -e "\e[1;31mPlease set your Monitor Arragement with arandr/xrandr and save the configuration using autorandr -s <name>\e[m"
+    echo ""
 else
     echo "Missing dependencies: "
     while read -r line; do
-        echo $line
-    done < ./missing
+        echo "$line"
+    done <./missing
 fi

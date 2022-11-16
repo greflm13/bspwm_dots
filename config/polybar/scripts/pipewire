@@ -1,0 +1,86 @@
+#!/bin/bash
+
+VOLUME_ICONS=("" "")
+MUTED_ICON=""
+MUTED_COLOR="%{F#6b6b6b}"
+DANGER_COLOR="%{F#FF3F4F}"
+WARN_COLOR="%{F#FFD945}"
+VOLUME=2
+
+# Run `pw-play --list-targets` for a list of sink names.
+ignored_sinks=(
+    "PulseEffects Sink"
+)
+
+dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
+
+switch-sink() {
+    sinks="$(pw-play --list-targets | sed '1d')"
+    for sink in "${ignored_sinks[@]}"; do
+        sinks="$(echo "$sinks" | sed "/$sink/d")"
+    done
+
+    if [ "$(echo "$sinks" | wc -l)" -le '1' ]; then
+        # there is no sink to switch to.
+        return
+    fi
+
+    names="$(echo "$sinks" | sed 's/*//' | awk -F\" '{ for(i=2; i<=NF; i=i+2){ a = a""$i"";} {print a; a="";}}')"
+
+    chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$sinks" | wc -l)" -p "Audio Device")"
+
+    case $chosen in
+        "")
+            echo "No option chosen."
+            ;;
+        *)
+            id=$(pw-play --list-targets | grep "$chosen" | sed 's/*//' | awk '{print $1}' | tr -d ':')
+            pactl set-default-sink "$id"
+            ;;
+    esac
+}
+
+output() {
+    VOLUME=$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | head -n1 | sed -s "s/%//g")
+    IS_MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}' | head -n1)
+
+    if [ "${IS_MUTED}" != "no" ]; then
+        echo "${MUTED_COLOR}${MUTED_ICON} Muted"
+    else
+        if [[ "${VOLUME}" -le 40 ]]; then
+            printf '%s ' "${VOLUME_ICONS[0]}"
+        elif [[ "${VOLUME}" -gt 40 && "${VOLUME}" -le 100 ]]; then
+            printf '%s ' "${VOLUME_ICONS[1]}"
+        elif [[ "${VOLUME}" -gt 100 && "${VOLUME}" -le 120 ]]; then
+            echo -n "${WARN_COLOR}"
+            printf '%s ' "${VOLUME_ICONS[1]}"
+        elif [[ "${VOLUME}" -gt 120 ]]; then
+            echo -n "${DANGER_COLOR}"
+            printf '%s ' "${VOLUME_ICONS[1]}"
+        fi
+        echo "${VOLUME}%"
+    fi
+
+}
+
+action=$1
+if [ "${action}" == "volume-up" ]; then
+    pactl set-sink-volume @DEFAULT_SINK@ +"$VOLUME"%
+elif [ "${action}" == "volume-down" ]; then
+    pactl set-sink-volume @DEFAULT_SINK@ -"$VOLUME"%
+elif [ "${action}" == "toggle-mute" ]; then
+    pactl set-sink-mute @DEFAULT_SINK@ toggle
+elif [ "${action}" == "switch-sink" ]; then
+    switch-sink
+fi
+
+if [ -n "$action" ]; then exit 0; fi
+
+#pactl subscribe 2>/dev/null
+pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
+    while read line; do
+        {
+            output
+        }
+done
+}

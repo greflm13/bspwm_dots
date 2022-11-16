@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 if [ "$(<~/.config/bspwm/lockscreenlock)" == "lock" ]; then
-    echo "queue" > ~/.config/bspwm/lockscreenqueue
+    echo "queue" >~/.config/bspwm/lockscreenqueue
     dunstify "Already generating lockscreen. Putting in queue..." -t 10000 -r 100
 else
-    echo "lock" > ~/.config/bspwm/lockscreenlock
+    echo "lock" >~/.config/bspwm/lockscreenlock
     dunstify "Generating lockscreen..." -t 10000 -r 100
-    betterlockscreen -u ~/.config/bspwm/lockscreen.png
+    betterlockscreen -u ~/.config/bspwm/lockscreen.png --span --fx
     dunstify "Lockscreen ready!" -t 10000 -r 100
-    echo "" > ~/.config/bspwm/lockscreenlock
+    echo "" >~/.config/bspwm/lockscreenlock
     if [ "$(<~/.config/bspwm/lockscreenqueue)" == "queue" ]; then
-        echo "" > ~/.config/bspwm/lockscreenqueue
+        echo "" >~/.config/bspwm/lockscreenqueue
         ~/.config/bspwm/lockscreen &
     fi
 fi

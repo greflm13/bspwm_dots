@@ -1,0 +1,37 @@
+#!/bin/bash
+
+print_status() {
+    printf ' '
+    temp=$(<~/.config/blugon/current)
+    echo "${temp}K"
+}
+
+plus() {
+    blugon --setcurrent="+100"
+    exit 0
+}
+
+minus() {
+    blugon --setcurrent="-100"
+    exit 0
+}
+
+case "$1" in
+    --plus)
+       plus
+        ;;
+    --minus)
+       minus
+        ;;
+    --status)
+       print_status
+       exit 0
+        ;;
+    *)
+       print_status
+        ;;
+esac
+
+fswatch ~/.config/blugon/current --event Updated -o 2>/dev/null | while read -r; do
+    print_status
+done

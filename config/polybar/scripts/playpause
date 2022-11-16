@@ -1,21 +1,13 @@
-#!/bin/sh
-if [[ $(ps -eaf | grep [.]config/polybar/scripts/playpause | awk '{print $2}' | wc -l) -ne 2 ]]; then
-	exit 0
-fi
+#!/bin/bash
+pause=""
+play=""
 
-pause=""
-play=""
-
-while true; do
-    if [[ $(playerctl status) == "Playing" ]]; then
-        if [[ $(< ~/.config/polybar/scripts/playpause.txt) != "$play" ]]; then
-            sed -i "1 c $play" ~/.config/polybar/scripts/playpause.txt ; sleep 1s
-        fi
-    elif [[ $(playerctl status) == "Paused" ]]; then
-        if [[ $(< ~/.config/polybar/scripts/playpause.txt) != "$pause" ]]; then
-        sed -i "1 c $pause" ~/.config/polybar/scripts/playpause.txt ; sleep 1s
-        fi
+playerctl status -F 2>/dev/null | while read -r line; do
+    if [[ $line == "Playing" ]]; then
+        echo "$pause"
+    elif [[ $line == "Paused" ]]; then
+        echo "$play"
     else
-        echo "" > ~/.config/polybar/scripts/playpause.txt ; sleep 1s
+        echo ""
     fi
 done

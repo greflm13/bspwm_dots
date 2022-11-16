@@ -1,0 +1,12 @@
+#!/bin/bash
+
+print_status() {
+    printf ' '
+    echo "scale=2;$(cat /sys/class/backlight/*/brightness) / $(cat /sys/class/backlight/*/max_brightness)" | bc | sed 's/\.//'
+}
+
+print_status
+
+fswatch /sys/class/backlight/*/brightness --event Updated -o 2>/dev/null | while read -r; do
+    print_status
+done

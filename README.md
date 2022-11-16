@@ -2,39 +2,29 @@
 
 ## Dependencies
 
-Fore everything to work, you'll need the following:
+For everything to work, you'll need the following:
 
-`autorandr`
-
-`betterlockscreen`
-
-`bspwm`
-
-`dmenu`
-
-`dunst`
-
-`dunstify`
-
-`feh`
-
-`flameshot`
-
-`jq`
-
-`networkmanager-dmenu`
-
-`numlockx`
-
-`picom`
-
-`playerctl`
-
-`polybar`
-
-`rofi`
-
-`sxhkd`
-
-`xterm`
-
+```bash
+autorandr
+betterlockscreen
+bluetoothctl
+blugon
+brightnessctl
+bspwm
+dmenu
+dunst
+dunstify
+feh
+flameshot
+fswatch
+j4-dmenu-desktop
+jq
+networkmanager-dmenu
+numlockx
+picom
+pipewire
+playerctl
+polybar
+sxhkd
+xterm
+```
