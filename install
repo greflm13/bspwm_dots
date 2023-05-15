@@ -39,7 +39,7 @@ if ! [ -f "./missing" ]; then
     done
     rsync -a config/* "${HOME}"/.config/
     rsync -a .??* "${HOME}"/ --exclude .git --exclude .bashrc --exclude .colorscripts
-    mkdir -P "${HOME}"/Pictures/Screenshots
+    mkdir -p "${HOME}"/Pictures/Screenshots
     mkdir -p "${HOME}"/.local/share/fonts
     scp fonts/*.ttf "${HOME}"/.local/share/fonts/
     fc-cache -f

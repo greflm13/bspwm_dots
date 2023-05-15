@@ -76,6 +76,8 @@ fi
 
 if [ -n "$action" ]; then exit 0; fi
 
+output
+
 #pactl subscribe 2>/dev/null
 pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
     while read line; do
