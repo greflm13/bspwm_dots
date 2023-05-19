@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo ""
+echo "Choose Polybar accent color:"
+echo -e "\x1b[48;2;20;21;26m                                          \x1b[0m"
+echo -e "\x1b[48;2;20;21;26m   1      2      3      4      5      6   \e[m"
+echo -e "\e[48;5;1m       \e[48;5;2m       \e[48;5;3m       \e[48;5;4m       \e[48;5;5m       \e[48;5;6m       \e[m"
 echo -e "\x1b[48;2;20;21;26m                                          \x1b[0m"
 echo -e "\x1b[48;2;20;21;26m   7      8      9     10     11     12   \e[m"
 echo -e "\e[48;5;9m       \e[48;5;10m       \e[48;5;11m       \e[48;5;12m       \e[48;5;13m       \e[48;5;14m       \e[m"
