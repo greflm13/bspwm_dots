@@ -11,10 +11,10 @@ while true; do
     currentRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes")
     currentTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes")
 
-    RX=$(echo $((currentRX - previousRX)) | numfmt --to=iec)
-    TX=$(echo $((currentTX - previousTX)) | numfmt --to=iec)
+    RX=$(echo $((currentRX - previousRX)) | numfmt --to=iec --padding=5)
+    TX=$(echo $((currentTX - previousTX)) | numfmt --to=iec --padding=5)
 
-    echo " ${RX}b/s   ${TX}b/s"
+    echo "${RX}b/s  ${TX}b/s"
 
     previousRX=$currentRX
     previousTX=$currentTX
