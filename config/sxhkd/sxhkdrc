@@ -10,17 +10,17 @@ super + KP_Enter
 
 # program launcher
 super + space
-    dmenu_run -i -nb '#08090c' -nf '#f6f6f6' -sb '#3e4451' -sf '#f6f6f6'
+    j4-dmenu-desktop --dmenu="dmenu -i -nb '#08090c' -nf '#f6f6f6' -sb '#3e4451' -sf '#f6f6f6'"
 
 alt + space
     ~/.config/polybar/scripts/launcher
 
 # apps
 super + shift + {b,e,m,v,t}
-    {firefox-bin,xterm -e ranger,xterm -e ncmpcpp,xterm -e vim,xterm -e rtorrent}
+    {firefox,xterm -e ranger,xterm -e ncmpcpp,xterm -e vim,xterm -e rtorrent}
 
 super + e
-    nemo
+    dolphin
 
 # displaythingy
 XF86Display
@@ -36,11 +36,11 @@ XF86Audio{Next,Prev,Play,Stop}
 
 # volume
 XF86AudioRaiseVolume
-    pactl set-sink-volume @DEFAULT_SINK@ +2% && value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" -h "string:hlcolor:#3e4451" -h int:value:$value -t 500 -r 1 -a "OSD"
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02+ && value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" -h "string:hlcolor:#3e4451" -h int:value:$value -t 500 -r 1 -a "OSD"
 XF86AudioLowerVolume
-    pactl set-sink-volume @DEFAULT_SINK@ -2% &&  value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" -h "string:hlcolor:#3e4451" -h int:value:$value -t 500 -r 1 -a "OSD"
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02- &&  value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" -h "string:hlcolor:#3e4451" -h int:value:$value -t 500 -r 1 -a "OSD"
 XF86AudioMute
-    pactl set-sink-mute @DEFAULT_SINK@ toggle &&  value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" "$(~/.config/sxhkd/audio_status.sh --mute)" -t 500 -r 1 -a "OSD"
+    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle &&  value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" "$(~/.config/sxhkd/audio_status.sh --mute)" -t 500 -r 1 -a "OSD"
 
 ctrl + alt + v
     ~/.config/sxhkd/volume.sh
@@ -63,7 +63,7 @@ super + Escape
 #
 
 # gaps
-super + alt  + g
+super + alt + g
     bspc config window_gap 0
 super + shift + g
     bspc config window_gap 12
@@ -139,7 +139,7 @@ super + shift + {Left,Down,Up,Right}
 	bspc node -z {left 20 0,bottom 0 -20,top 0 20,right -20 0}
 
 # move a floating window
-super + {Left,Down,Up,Right}
+super + alt + {Left,Down,Up,Right}
 	bspc node -v {-20 0,0 20,0 -20,20 0}
 
 # lockscreen
@@ -151,3 +151,6 @@ alt + shift + Escape
 
 alt + shift + c
     ~/.config/polybar/scripts/powermenu
+
+ctrl + shift + Escape
+    xterm -e btop

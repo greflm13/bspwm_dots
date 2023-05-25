@@ -5,7 +5,7 @@ MUTED_ICON=""
 MUTED_COLOR="%{F#6b6b6b}"
 DANGER_COLOR="%{F#FF3F4F}"
 WARN_COLOR="%{F#FFD945}"
-VOLUME=2
+VOLUME=0.02
 
 # Run `pw-play --list-targets` for a list of sink names.
 ignored_sinks=(
@@ -15,36 +15,31 @@ ignored_sinks=(
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
 switch-sink() {
-    sinks="$(pw-play --list-targets | sed '1d')"
-    for sink in "${ignored_sinks[@]}"; do
-        sinks="$(echo "$sinks" | sed "/$sink/d")"
-    done
+    sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sink endpoints/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+    names="$(for id in $sinkids; do wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
 
-    if [ "$(echo "$sinks" | wc -l)" -le '1' ]; then
-        # there is no sink to switch to.
-        return
-    fi
-
-    names="$(echo "$sinks" | sed 's/*//' | awk -F\" '{ for(i=2; i<=NF; i=i+2){ a = a""$i"";} {print a; a="";}}')"
-
-    chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$sinks" | wc -l)" -p "Audio Device")"
+    chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$sinkids" | wc -l)" -p "Audio Device")"
 
     case $chosen in
         "")
             echo "No option chosen."
             ;;
         *)
-            id=$(pw-play --list-targets | grep "$chosen" | sed 's/*//' | awk '{print $1}' | tr -d ':')
-            pactl set-default-sink "$id"
+            for id in $sinkids; do
+                if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                    chosenid=$id
+                fi
+            done
+            wpctl set-default $chosenid
             ;;
     esac
 }
 
 output() {
-    VOLUME=$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | head -n1 | sed -s "s/%//g")
-    IS_MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}' | head -n1)
+    VOLUME=$(echo "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+    IS_MUTED=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $3}')
 
-    if [ "${IS_MUTED}" != "no" ]; then
+    if [ "${IS_MUTED}" == "[MUTED]" ]; then
         echo "${MUTED_COLOR}${MUTED_ICON} Muted"
     else
         if [[ "${VOLUME}" -le 40 ]]; then
@@ -65,11 +60,11 @@ output() {
 
 action=$1
 if [ "${action}" == "volume-up" ]; then
-    pactl set-sink-volume @DEFAULT_SINK@ +"$VOLUME"%
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"+
 elif [ "${action}" == "volume-down" ]; then
-    pactl set-sink-volume @DEFAULT_SINK@ -"$VOLUME"%
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"-
 elif [ "${action}" == "toggle-mute" ]; then
-    pactl set-sink-mute @DEFAULT_SINK@ toggle
+    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
 elif [ "${action}" == "switch-sink" ]; then
     switch-sink
 fi
@@ -77,7 +72,6 @@ fi
 if [ -n "$action" ]; then exit 0; fi
 
 output
-
 #pactl subscribe 2>/dev/null
 pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
     while read line; do

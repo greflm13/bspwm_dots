@@ -1,15 +1,15 @@
 #!/bin/bash
 
 volume() {
-    VOLUME=$(pactl get-sink-volume @DEFAULT_SINK@ | awk '{print $5}' | head -n1 | sed -s "s/%//g")
+    VOLUME=$(echo "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
 
     echo "${VOLUME}%"
 }
 
 ismute() {
-    IS_MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ | awk '{print $2}' | head -n1)
+    IS_MUTED=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $3}')
 
-    if [ "${IS_MUTED}" != "no" ]; then
+    if [ "${IS_MUTED}" == "[MUTED]" ]; then
         echo "Muted!"
     else
         echo "Unmuted!"
