@@ -42,6 +42,9 @@ XF86AudioLowerVolume
 XF86AudioMute
     wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle &&  value=$(~/.config/sxhkd/audio_status.sh --volume); dunstify "Volume: [$value]" "$(~/.config/sxhkd/audio_status.sh --mute)" -t 500 -r 1 -a "OSD"
 
+XF86AudioMicMute
+    wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
 ctrl + alt + v
     ~/.config/sxhkd/volume.sh
 

@@ -6,6 +6,8 @@ MUTED_COLOR="%{F#6b6b6b}"
 DANGER_COLOR="%{F#FF3F4F}"
 WARN_COLOR="%{F#FFD945}"
 VOLUME=0.02
+MICROPHONE=""
+MICROPHONEMUTE=""
 
 # Run `pw-play --list-targets` for a list of sink names.
 ignored_sinks=(
@@ -35,6 +37,36 @@ switch-sink() {
     esac
 }
 
+switch-mic() {
+    micids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sources/d' | sed '/Source endpoints/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+    names="$(for id in $micids; do wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
+
+    chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$micids" | wc -l)" -p "Microphone")"
+
+    case $chosen in
+        "")
+            echo "No option chosen."
+            ;;
+        *)
+            for id in $micids; do
+                if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                    chosenid=$id
+                fi
+            done
+            wpctl set-default $chosenid
+            ;;
+    esac
+}
+
+mic-status() {
+    IS_MUTED=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | awk '{print $3}')
+    if [ "${IS_MUTED}" == "[MUTED]" ]; then
+        echo "${MUTED_COLOR}${MICROPHONEMUTE}"
+    else
+        echo "${MICROPHONE}"
+    fi
+}
+
 output() {
     VOLUME=$(echo "$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
     IS_MUTED=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print $3}')
@@ -59,24 +91,48 @@ output() {
 }
 
 action=$1
-if [ "${action}" == "volume-up" ]; then
-    wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"+
-elif [ "${action}" == "volume-down" ]; then
-    wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"-
-elif [ "${action}" == "toggle-mute" ]; then
-    wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-elif [ "${action}" == "switch-sink" ]; then
-    switch-sink
-fi
-
-if [ -n "$action" ]; then exit 0; fi
-
-output
-#pactl subscribe 2>/dev/null
-pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
-    while read line; do
-        {
-            output
+case $action in
+    "volume-up")
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"+
+        ;;
+    "volume-down")
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"-
+        ;;
+    "toggle-mute")
+        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+        ;;
+    "switch-sink")
+        switch-sink
+        ;;
+    "mic-mute")
+        wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+        ;;
+    "switch-mic")
+        switch-mic
+        ;;
+    "mic-status")
+        mic-status
+        pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on source" | {
+            while read line; do
+                {
+                    mic-status
+                }
+        done
         }
-done
-}
+        ;;
+    "")
+        output
+        #pactl subscribe 2>/dev/null
+        pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
+            while read line; do
+                {
+                    output
+                }
+        done
+        }
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
