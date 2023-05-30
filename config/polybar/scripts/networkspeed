@@ -1,18 +1,23 @@
 #!/bin/bash
 
-interface=$(ip route get 1.1.1.1 | head -n1 | awk '{print $5}')
+interface=$(ip route get 1.1.1.1 2>/dev/null | head -n1 | awk '{print $5}')
 previousRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes")
 previousTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes")
 
 while true; do
     sleep 1 &
-    interface=$(ip route get 1.1.1.1 | head -n1 | awk '{print $5}')
+    interface=$(ip route get 1.1.1.1 2>/dev/null | head -n1 | awk '{print $5}')
 
     currentRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes")
     currentTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes")
 
-    RX=$(echo $((currentRX - previousRX)) | numfmt --to=iec --padding=5)
-    TX=$(echo $((currentTX - previousTX)) | numfmt --to=iec --padding=5)
+    if [[ $interface != "" ]]; then
+        RX=$(echo $((currentRX - previousRX)) | numfmt --to=iec --padding=5)
+        TX=$(echo $((currentTX - previousTX)) | numfmt --to=iec --padding=5)
+    else
+        RX=0
+        TX=0
+    fi
 
     echo "${RX}b/s  ${TX}b/s"
 
