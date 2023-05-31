@@ -1,15 +1,64 @@
 #!/bin/bash
-echo "checking if all dependencies are installed..."
-echo ""
-rm -f ./missing
-for PROG in {scp,autorandr,betterlockscreen,bspwm,dmenu,dunst,dunstify,feh,flameshot,jq,networkmanager_dmenu,numlockx,picom,playerctl,polybar,sxhkd,xterm,rsync,j4-dmenu-desktop,blugon,pipewire,bluetoothctl,brightnessctl,fswatch}; do
-    if ! command -v "$PROG" >/dev/null; then
-        echo "$PROG" >>./missing
-    fi
-done
 
-if ! [ -f "./missing" ]; then
-    echo all dependencies met
+dependencies=(
+    autorandr
+    awk
+    bc
+    betterlockscreen
+    bluetoothctl
+    blugon
+    brightnessctl
+    bspc
+    bspwm
+    cp
+    dmenu
+    dunst
+    dunstify
+    feh
+    flameshot
+    fswatch
+    git
+    grep
+    ip
+    j4-dmenu-desktop
+    jq
+    networkmanager_dmenu
+    numlockx
+    picom
+    ping
+    pipewire
+    playerctl
+    polybar
+    rsync
+    scp
+    sed
+    sudo
+    sxhkd
+    wpctl
+    xrandr
+    xset
+    xsetroot
+    xterm
+)
+
+checkdeps() {
+    echo "checking if all dependencies are installed..."
+    echo ""
+    MISSING=()
+    for dep in "${dependencies[@]}"; do
+        if ! command -v "$dep" >/dev/null; then
+            MISSING+=("$dep")
+        fi
+    done
+    if ((${#MISSING[@]} != 0)); then
+        echo "Missing dependencies: ${MISSING[*]}"
+        exit 1
+    else
+        echo all dependencies met
+    fi
+}
+
+bashrc() {
     echo "overwrite .bashrc? [Y/n]"
     while true; do
         read -r answer
@@ -19,12 +68,16 @@ if ! [ -f "./missing" ]; then
             scp .colorscripts "${HOME}"/.colorscripts
             rm -rf "${HOME}"/pureline
             git clone https://github.com/chris-marsh/pureline.git "${HOME}"/pureline
-            scp "${HOME}"/pureline/configs/powerline_full_256col.conf "${HOME}"/.pureline.conf
+            cp "${HOME}"/pureline/configs/powerline_full_256col.conf "${HOME}"/.pureline.conf
+            sed -i '/duration_segment/ s/./#&/' "${HOME}"/.pureline.conf
             break
         else
             break
         fi
     done
+}
+
+wallpaper() {
     echo "set wallpaper? [Y/n]"
     while true; do
         read -r answer
@@ -37,14 +90,9 @@ if ! [ -f "./missing" ]; then
             break
         fi
     done
-    rsync -a config/* "${HOME}"/.config/
-    rsync -a .??* "${HOME}"/ --exclude .git --exclude .bashrc --exclude .colorscripts
-    mkdir -p "${HOME}"/Pictures/Screenshots
-    mkdir -p "${HOME}"/.local/share/fonts
-    scp fonts/*.ttf "${HOME}"/.local/share/fonts/
-    fc-cache -f
-    xrdb -remove
-    xrdb -merge ~/.Xresources
+}
+
+color() {
     echo ""
     echo "Choose Polybar accent color:"
     echo -e "\x1b[48;2;20;21;26m                                          \x1b[0m"
@@ -123,13 +171,41 @@ if ! [ -f "./missing" ]; then
     sed -i "s/^drawColor=.*/drawColor=#${color}/g" "${HOME}"/.config/flameshot/flameshot.ini
     sed -i "s/^uiColor=.*/uiColor=#${color}/g" "${HOME}"/.config/flameshot/flameshot.ini
     sed -i "s/^\s*frame_color = .*/    frame_color = \"#${color}\"/g" "${HOME}"/.config/dunst/dunstrc
-    sed -i "s/^thermal-zone = .*/thermal-zone = $(for i in /sys/class/thermal/thermal_zone*; do echo "$i: $(<"$i"/type)"; done | grep pkg_temp | sed 's/\/sys\/class\/thermal\/thermal_zone\(.*\):.*/\1/g')/g" "${HOME}"/.config/polybar/modules.ini
     echo ""
+}
+
+setconfig() {
+    rsync -a config/* "${HOME}"/.config/
+    rsync -a .??* "${HOME}"/ --exclude .git --exclude .bashrc --exclude .colorscripts
+    mkdir -p "${HOME}"/Pictures/Screenshots
+    mkdir -p "${HOME}"/.local/share/fonts
+    scp fonts/*.ttf "${HOME}"/.local/share/fonts/
+    fc-cache -f
+    xrdb -remove
+    xrdb -merge ~/.Xresources
+    sed -i "s/^thermal-zone = .*/thermal-zone = $(for i in /sys/class/thermal/thermal_zone*; do echo "$i: $(<"$i"/type)"; done | grep pkg_temp | sed 's/\/sys\/class\/thermal\/thermal_zone\(.*\):.*/\1/g')/g" "${HOME}"/.config/polybar/modules.ini
+
     echo -e "\e[1;31mPlease set your Monitor Arragement with arandr/xrandr and save the configuration using autorandr -s <name>\e[m"
     echo ""
-else
-    echo "Missing dependencies: "
-    while read -r line; do
-        echo "$line"
-    done <./missing
-fi
+}
+
+main() {
+    checkdeps
+    bashrc
+    wallpaper
+    color
+    setconfig
+}
+
+case $1 in
+    "")
+        main
+        ;;
+    "colorswitch")
+        color
+        ;;
+    *)
+        echo "usage: install [colorswitch]"
+        exit 1
+        ;;
+esac

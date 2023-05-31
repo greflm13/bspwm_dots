@@ -53,6 +53,8 @@ ctrl + alt + b
 
 # screenshot keybindings
 Print
+    flameshot gui -p ~/Pictures/Screenshots/
+shift + Print
     flameshot screen -p ~/Pictures/Screenshots/
 ctrl + Print
     flameshot full -p ~/Pictures/Screenshots/

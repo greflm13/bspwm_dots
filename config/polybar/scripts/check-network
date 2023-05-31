@@ -2,7 +2,7 @@
 
 disconnected=""
 wireless_connected=""
-ethernet_connected=""
+ethernet_connected=""
 
 echo "$disconnected"
 while true; do

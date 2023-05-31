@@ -9,11 +9,6 @@ VOLUME=0.02
 MICROPHONE=""
 MICROPHONEMUTE=""
 
-# Run `pw-play --list-targets` for a list of sink names.
-ignored_sinks=(
-    "PulseEffects Sink"
-)
-
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
 switch-sink() {

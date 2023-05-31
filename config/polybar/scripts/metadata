@@ -2,7 +2,7 @@
 # shellcheck disable=SC2001
 echo ""
 
-playerctl metadata -F 2>1 | while read -r line; do
+playerctl metadata -F 2>&1 | while read -r line; do
     if [[ $line == *artist* ]]; then
         artist=$(sed 's/^.*:artist\s*\(.*\)/\1/g' <<< "$line")
 #        echo "$artist - $title"
