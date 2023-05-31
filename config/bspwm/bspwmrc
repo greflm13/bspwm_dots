@@ -8,9 +8,9 @@ xsetroot -cursor_name left_ptr &
 
 xset s off -dpms
 
-sudo rmmod pcspkr
+sudo rmmod pcspkr &
 
-numlockx &
+numlockx on
 
 autorandr -c --force
 
