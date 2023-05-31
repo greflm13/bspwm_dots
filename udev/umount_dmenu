@@ -1,0 +1,28 @@
+#!/bin/sh
+# use dmenu to choose what to unmount
+
+dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6 -l 100"
+
+# $1 = msg
+dmenu_notify() {
+	: | $dmenu_command -p "$1 (press enter)"
+}
+
+pass="$(: | $dmenu_command -p "SUDO Password: ")"
+
+dir="$(awk '$2 ~ /^\/media\// {print $2}' /etc/mtab | cut -d / -f 3 | $dmenu_command -p "Select media device to remove")"
+dir=$(printf $dir) # cleanup escaped chars
+if [ -z "$dir" ] || ! [ -d "/media/$dir" ]; then
+	echo "invalid selection: '$dir'"
+	exit 1
+fi
+
+if result=$(echo $pass | sudo -S umount "/media/$dir" 2>&1); then
+	echo $pass | sudo -S rmdir "/media/$dir"
+	dmenu_notify "You can now safely remove $dir"
+	exit 0
+else
+	echo "$result"
+	dmenu_notify "ERROR: $result"
+	exit 32
+fi

@@ -23,12 +23,14 @@ dependencies=(
     j4-dmenu-desktop
     jq
     networkmanager_dmenu
+    ntfs-3g
     numlockx
     picom
     ping
     pipewire
     playerctl
     polybar
+    ranger
     rsync
     scp
     sed
@@ -189,12 +191,24 @@ setconfig() {
     echo ""
 }
 
+automount() {
+    sudo install -D udev/media-automount /bin/media-automount
+	sudo install -D udev/umount_dmenu /bin/umount_dmenu
+	sudo install -Dm644 udev/media-automount.rules /lib/udev/rules.d/99-media-automount.rules
+	sudo install -Dm644 udev/media-automount@.service /lib/systemd/system/media-automount@.service
+	sudo install -d /etc/media-automount.d
+	sudo install -Cm644 udev/media-automount.d/* /etc/media-automount.d/
+    sudo udevadm control --reload-rules
+    sudo udevadm trigger
+}
+
 main() {
     checkdeps
     bashrc
     wallpaper
     color
     setconfig
+    automount
 }
 
 case $1 in
