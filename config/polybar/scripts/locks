@@ -1,0 +1,40 @@
+#!/bin/bash
+
+caps() {
+	if [[ $(xset -q | sed -n 's/^.*Caps Lock:\s*\(\S*\).*$/\1/p') == "on" ]]; then
+		echo "⇪ CapsLock"
+	else
+		echo ""
+	fi
+}
+
+num() {
+	if [[ $(xset -q | sed -n 's/^.*Num Lock:\s*\(\S*\).*$/\1/p') == "on" ]]; then
+		echo "⇭ NumLock"
+	else
+		echo ""
+	fi
+}
+
+scroll() {
+	if [[ $(xset -q | sed -n 's/^.*Scroll Lock:\s*\(\S*\).*$/\1/p') == "on" ]]; then
+		echo "⤓ ScrollLock"
+	else
+		echo ""
+	fi
+}
+
+case $1 in
+	"caps")
+		caps
+		;;
+	"num")
+		num
+		;;
+	"scroll")
+		scroll
+		;;
+	*)
+		exit 0
+		;;
+esac
