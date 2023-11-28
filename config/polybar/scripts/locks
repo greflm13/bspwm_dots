@@ -26,13 +26,22 @@ scroll() {
 
 case $1 in
 	"caps")
-		caps
+		while true; do
+			caps
+			sleep 1
+		done
 		;;
 	"num")
-		num
+		while true; do
+			num
+			sleep 1
+		done
 		;;
 	"scroll")
-		scroll
+		while true; do
+			scroll
+			sleep 1
+		done
 		;;
 	*)
 		exit 0
