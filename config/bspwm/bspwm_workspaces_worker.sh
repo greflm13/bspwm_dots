@@ -5,7 +5,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
     sorted=$(xrandr -q | grep '\bconnected' | sed 's/primary//' | awk '{print $3}' | sed 's/.*+\(.*\)+.*/\1/' | sort)
     num="$(xrandr --query | grep -c '\bconnected')"
     if [ "$num" -eq "4" ]; then
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc monitor "$MONITOR" -a Desktop
         done
         for DESKTOP in 1 2 3; do
@@ -26,11 +26,11 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
         for DESKTOP in $(bspc query -D --names | grep Desktop); do
             bspc desktop Desktop -r
         done
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc query -m "$MONITOR" -T | jq -r .desktops[].name | sort -n | xargs bspc monitor "$MONITOR" -o
         done
     elif [ "$num" -eq "3" ]; then
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc monitor "$MONITOR" -a Desktop
         done
         for DESKTOP in 1 2 3 4; do
@@ -48,11 +48,11 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
         for DESKTOP in $(bspc query -D --names | grep Desktop); do
             bspc desktop Desktop -r
         done
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc query -m "$MONITOR" -T | jq -r .desktops[].name | sort -n | xargs bspc monitor "$MONITOR" -o
         done
     elif [ "$num" -eq "2" ]; then
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc monitor "$MONITOR" -a Desktop
         done
         for DESKTOP in 1 2 3 4 5 6; do
@@ -67,11 +67,11 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
         for DESKTOP in $(bspc query -D --names | grep Desktop); do
             bspc desktop Desktop -r
         done
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc query -m "$MONITOR" -T | jq -r .desktops[].name | sort -n | xargs bspc monitor "$MONITOR" -o
         done
     else
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc monitor "$MONITOR" -a Desktop
         done
         for DESKTOP in 1 2 3 4 5 6 7 8 9 10 11 12; do
@@ -83,7 +83,7 @@ if [ "$(<~/.config/bspwm/lock)" != "lock" ]; then
         for DESKTOP in $(bspc query -D --names | grep Desktop); do
             bspc desktop Desktop -r
         done
-        for MONITOR in $(bspc query -M); do
+        for MONITOR in $(xrandr --query | grep '\bconnected' | sed 's/ .*//'); do
             bspc query -m "$MONITOR" -T | jq -r .desktops[].name | sort -n | xargs bspc monitor "$MONITOR" -o
         done
     fi
