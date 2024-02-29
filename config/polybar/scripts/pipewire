@@ -5,9 +5,14 @@ MUTED_ICON=""
 MUTED_COLOR="%{F#6b6b6b}"
 DANGER_COLOR="%{F#FF3F4F}"
 WARN_COLOR="%{F#FFD945}"
-VOLUME=0.02
+VOLUMESTEP=0.02
 MICROPHONE=""
 MICROPHONEMUTE=""
+
+# Run `pw-play --list-targets` for a list of sink names.
+ignored_sinks=(
+    "PulseEffects Sink"
+)
 
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
@@ -88,10 +93,10 @@ output() {
 action=$1
 case $action in
     "volume-up")
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"+
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUMESTEP"+
         ;;
     "volume-down")
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUME"-
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ "$VOLUMESTEP"-
         ;;
     "toggle-mute")
         wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
@@ -124,7 +129,7 @@ case $action in
                     output
                 }
         done
-        }
+        }    
         ;;
     *)
         exit 0

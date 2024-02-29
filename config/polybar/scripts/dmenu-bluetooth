@@ -170,6 +170,14 @@ print_status() {
             if device_connected "$device"; then
                 device_alias=$(bluetoothctl info "$device" | grep "Alias" | cut -d ' ' -f 2-)
                 battery=$(bluetoothctl info "$device" | grep "Battery Percentage" | cut -d ' ' -f 4- | grep -o [0-9]*)
+                sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sink endpoints/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+                for id in $sinkids; do
+                    if [[ "$device_alias" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                        chosenid=$id
+                    fi
+                done
+                volume=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+
 
                 if [ $counter -gt 0 ]; then
                     printf ", %s" "$device_alias"
@@ -178,6 +186,9 @@ print_status() {
                 fi
                 if [ -n "$battery" ]; then
                     printf " %s%%" "$battery"
+                fi
+                if [ -n "$volume" ]; then
+                    printf " %s%%" "$volume"
                 fi
 
                 ((counter++))
