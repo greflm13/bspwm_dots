@@ -32,7 +32,24 @@ switch-sink() {
                     chosenid=$id
                 fi
             done
-            wpctl set-default $chosenid
+            current_vol=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+            setting="$(echo -e "change volume\ntoggle mute\nset default sink" | $dmenu_command -l 3 -p "Settings for $chosen")"
+
+            case $setting in
+                "change volume")
+                    volume="$(echo "" | $dmenu_command -p "Current Volume: $current_vol")"
+                    [[ "$volume" =~ ^[0-9]{1,3}$ ]] && wpctl set-volume $chosenid "$volume"%
+                    ;;
+                "toggle mute")
+                    wpctl set-mute $chosenid toggle
+                    ;;
+                "set default sink")
+                    wpctl set-default $chosenid
+                    ;;
+                *)
+                    echo "No option chosen."
+                    ;;
+            esac
             ;;
     esac
 }
