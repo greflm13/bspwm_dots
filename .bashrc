@@ -6,7 +6,7 @@
 
 source ~/.colorscripts
 
-pfetch
+uwufetch
 
 colorpanes
 
@@ -49,9 +49,9 @@ if ${use_color}; then
 	fi
 
 	if [[ ${EUID} == 0 ]]; then
-		PS1='\[\033[01;31m\][\h\[\033[01;36m\] \W\[\033[01;31m\]]\$\[\033[00m\] '
+		PS1='\[\033[1;31m\]\u@\h\[\033[37m\]:\[\033[34m\]\w\[\033[0;37m\]\$ '
 	else
-		PS1='\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\] '
+		PS1='\[\033[1;32m\]\u@\h\[\033[37m\]:\[\033[34m\]\w\[\033[0;37m\]\$ '
 	fi
 
 	alias ls='ls --color=auto'
@@ -60,10 +60,16 @@ if ${use_color}; then
 	alias fgrep='fgrep --colour=auto'
 	alias ip='ip -c'
 	alias df='df -Th'
-	alias ll='ls -hall'
+	alias ll='eza -la'
 	alias fuck='sudo $(fc -ln -1)'
 	alias please='sudo'
 	alias uwu='uwuify'
+	alias icat='icat -m both'
+	alias df='df -Th'
+	alias pray='git commit -m "🙏"'
+	alias gitdir='cd ${HOME}/git'
+	alias ayay='yay'
+	alias uwuptime='uptime | uwuify'
 else
 	if [[ ${EUID} == 0 ]]; then
 		# show root@ when we don't have colors
@@ -148,7 +154,7 @@ dc() {
 	local dir="${dir:=$HOME}"
 	if [[ -d "$dir" ]]; then
 		cd "$dir" >/dev/null
-		ls -l --color=auto
+		eza -hl --color=auto
 	else
 		echo "bash: cl: $dir: Directory not found"
 	fi
@@ -182,4 +188,59 @@ note() {
 	fi
 }
 
+gitclone() {
+	re='.*@(.*):[0-9]*\/?(.*)\/(.*)\.git'
+	if [[ $1 =~ $re ]]; then
+		mkdir -p $HOME/git/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+		git clone $1 $HOME/git/${BASH_REMATCH[1]}/${BASH_REMATCH[2]}/${BASH_REMATCH[3]}
+	fi
+}
+
+gitpull() {
+	dir=$(pwd)
+	for folder in $(find "$HOME/git" -maxdepth 3 -mindepth 3 -type d | sort); do
+		cd $folder
+		pwd
+		git pull
+	done
+	cd "$dir"
+}
+
+gitdiff() {
+	dir=$(pwd)
+	for folder in $(find "$HOME/git" -maxdepth 3 -mindepth 3 -type d | sort); do
+		cd $folder
+		git diff
+	done
+	cd "$dir"
+}
+
+gitreset() {
+	dir=$(pwd)
+	for folder in $(find "$HOME/git" -maxdepth 3 -mindepth 3 -type d | sort); do
+		cd $folder
+		git reset --hard
+	done
+	cd "$dir"
+}
+
+gitblame() {
+	dir=$(pwd)
+	for folder in $(find "$HOME/git" -maxdepth 3 -mindepth 3 -type d | sort); do
+		cd $folder
+		pwd | sed "s%$HOME/git/%%g"
+		git log --author="$1"
+		echo ""
+	done
+	cd "$dir"
+}
+
+export PATH="${HOME}/.local/bin:$PATH"
 source ~/pureline/pureline ~/.pureline.conf
+export VISUAL=vim
+export EDITOR="$VISUAL"
+export HISTSIZE=-1
+export HISTFILESIZE=-1
+export HISTCONTROL="ignoreboth:erasedups"
+
+export GPG_TTY=$(tty)
