@@ -10,6 +10,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'sheerun/vim-polyglot'
 Plug 'greflm13/monokai_vibrant'
 Plug 'itchyny/lightline.vim'
+Plug 'pearofducks/ansible-vim', { 'do': './UltiSnips/generate.sh' }
 
 call plug#end()
 
@@ -37,3 +38,6 @@ let g:lightline = {
 let g:lightline.tab = {
  \ 'active' : [ 'filename', 'modified' ],
  \ 'inactive' : [ 'filename', 'modified' ] }
+
+let g:ansible_unindent_after_newline = 1
+let g:ansible_extra_keywords_highlight = 1
