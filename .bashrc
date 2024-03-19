@@ -161,12 +161,7 @@ dc() {
 }
 
 ipif() {
-	if grep -P "(([1-9]\d{0,2})\.){3}(?2)" <<<"$1"; then
-		curl ipinfo.io/"$1"
-	else
-		ipawk=($(host "$1" | awk '/address/ { print $NF }'))
-		curl ipinfo.io/${ipawk[1]}
-	fi
+	curl ipinfo.io
 	echo
 }
 
