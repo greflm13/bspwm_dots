@@ -17,42 +17,48 @@ ignored_sinks=(
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
 switch-sink() {
-    sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sources/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+    sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sources/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g') $(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Filters/d' | sed '/Streams/,$d' | sed '$d' | sed -s 's/\*//g' | grep "Sink" | awk '{print $2}' | sed -s 's/\.//g')"
     names="$(for id in $sinkids; do wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
 
-    chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$sinkids" | wc -l)" -p "Audio Device")"
+    while true; do
+        chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$names" | wc -l)" -p "Audio Device")"
 
-    case $chosen in
-        "")
-            echo "No option chosen."
-            ;;
-        *)
-            for id in $sinkids; do
-                if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
-                    chosenid=$id
-                fi
-            done
-            current_vol=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
-            current_mute=$(wpctl get-volume $chosenid | awk '{print $3}' | head -n1)
-            setting="$(echo -e "change volume: $current_vol\ntoggle mute: $current_mute\nset default sink" | $dmenu_command -l 3 -p "Settings for $chosen")"
+        case $chosen in
+            "")
+                echo "No option chosen."
+                exit
+                ;;
+            *)
+                for id in $sinkids; do
+                    if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                        chosenid=$id
+                    fi
+                done
+                current_vol=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+                current_mute=$(wpctl get-volume $chosenid | awk '{print $3}' | head -n1)
+                setting="$(echo -e "change volume: $current_vol\ntoggle mute: $current_mute\nset default sink" | $dmenu_command -l 3 -p "Settings for $chosen")"
 
-            case $setting in
-                "change volume: $current_vol")
-                    volume="$(echo "" | $dmenu_command -p "Current Volume: $current_vol")"
-                    [[ "$volume" =~ ^[0-9]{1,3}$ ]] && wpctl set-volume $chosenid "$volume"%
-                    ;;
-                "toggle mute: $current_mute")
-                    wpctl set-mute $chosenid toggle
-                    ;;
-                "set default sink")
-                    wpctl set-default $chosenid
-                    ;;
-                *)
-                    echo "No option chosen."
-                    ;;
-            esac
-            ;;
-    esac
+                case $setting in
+                    "change volume: $current_vol")
+                        volume="$(echo "" | $dmenu_command -p "Current Volume: $current_vol")"
+                        [[ "$volume" =~ ^[0-9]{1,3}$ ]] && wpctl set-volume $chosenid "$volume"%
+                        exit
+                        ;;
+                    "toggle mute: $current_mute")
+                        wpctl set-mute $chosenid toggle
+                        exit
+                        ;;
+                    "set default sink")
+                        wpctl set-default $chosenid
+                        exit
+                        ;;
+                    *)
+                        echo "No option chosen."
+                        ;;
+                esac
+                ;;
+        esac
+    done
 }
 
 switch-mic() {
