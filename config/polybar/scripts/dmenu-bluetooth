@@ -5,7 +5,7 @@
 # | (_| | | | | | |  __/ | | | |_| |_____| |_) | | |_| |  __/ || (_) | (_) | |_ | | | |
 #  \__,_|_| |_| |_|\___|_| |_|\__,_|     |_.__/|_|\__,_|\___|\__\___/ \___/ \__||_| |_|
 #
-# Author: Nick Clyde (clydedroid)
+# Author: Nick Clyde (clydedroid) Modified by Flo Greistorfer (Sorogon)
 # dmenu support by: Layerex
 #
 # A script that generates a dmenu menu that uses bluetoothctl to
@@ -177,7 +177,9 @@ print_status() {
                         chosenid=$id
                     fi
                 done
-                volume=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+                if [[ -n $chosenid ]]; then
+                    volume=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+                fi
 
 
                 if [ $counter -gt 0 ]; then
@@ -193,6 +195,7 @@ print_status() {
                 fi
 
                 ((counter++))
+                unset chosenid
             fi
         done
 
@@ -300,10 +303,37 @@ show_menu() {
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
 loop_status() {
+    print_status
+    pactl_subscribe &
+    power=$(bluetoothctl show | grep Powered)
+    info=$(bluetoothctl info 2>/dev/null | grep Battery)
+    connected=$(bluetoothctl devices Connected)
     while true; do
-        print_status
+        curr_inf=$(bluetoothctl info 2>/dev/null | grep Battery)
+        curr_pow=$(bluetoothctl show | grep Powered)
+        curr_con=$(bluetoothctl devices Connected)
+        if [[ $curr_pow != $power ]]; then
+            power=$curr_pow
+            print_status
+        elif [[ $curr_inf != $info ]]; then
+            info=$curr_inf
+            print_status
+        elif [[ $curr_con != $connected ]]; then
+            connected=$curr_con
+            print_status
+        fi
         sleep 1
     done
+}
+
+pactl_subscribe() {
+   pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink " | {
+       while read line; do
+           {
+               print_status
+            }
+        done
+    }
 }
 
 case "$1" in
