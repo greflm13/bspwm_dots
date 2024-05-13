@@ -4,11 +4,31 @@
 
 [[ $- != *i* ]] && return
 
-source ~/.colorscripts
+export PATH="${HOME}/.local/bin:$PATH"
+export VISUAL=vim
+export EDITOR="$VISUAL"
+export HISTSIZE=-1
+export HISTFILESIZE=-1
+export HISTCONTROL="erasedups"
 
-uwufetch
+[[ -f ~/.colorscripts ]] && source ~/.colorscripts
 
-colorpanes
+if command -v "uwufetch" >/dev/null; then
+	uwufetch
+elif command -v "rsfetch" >/dev/null; then
+	rsfetch -PdehrlksuN
+elif command -v "pfetch" >/dev/null; then
+	pfetch
+elif command -v "ufetch" >/dev/null; then
+	ufetch
+elif command -v "neofetch" >/dev/null; then
+	neofetch
+elif command -v "screenfetch" >/dev/null; then
+	screenfetch
+fi
+
+[[ -f ~/.colorscripts ]] && colorpanes
+
 
 [ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 
@@ -59,17 +79,19 @@ if ${use_color}; then
 	alias egrep='egrep --colour=auto'
 	alias fgrep='fgrep --colour=auto'
 	alias ip='ip -c'
-	alias df='df -Th'
-	alias ll='eza -la'
-	alias fuck='sudo $(fc -ln -1)'
-	alias please='sudo'
-	alias uwu='uwuify'
 	alias icat='icat -m both'
-	alias df='df -Th'
-	alias pray='git commit -m "🙏"'
-	alias gitdir='cd ${HOME}/git'
-	alias ayay='yay'
-	alias uwuptime='uptime | uwuify'
+	if command -v "eza" >/dev/null; then
+		alias ll='eza -la --icons'
+		alias l='eza -l --icons'
+		alias tree='eza -Tl --icons'
+	elif command -v "exa" >/dev/null; then
+		alias ll='exa -la --icons'
+		alias l='exa -l --icons'
+		alias tree='exa -Tl --icons'
+	else
+		alias ll='ls -lAh --color=auto'
+	fi
+
 else
 	if [[ ${EUID} == 0 ]]; then
 		# show root@ when we don't have colors
@@ -82,10 +104,11 @@ fi
 unset use_color safe_term match_lhs sh
 
 alias cp="cp -i"     # confirm before overwriting something
-alias df='df -h'     # human-readable sizes
-alias free='free -m' # show sizes in MB
-alias np='nano -w PKGBUILD'
+alias free='free -h'
 alias more=less
+alias fuck='sudo $(fc -ln -1)'
+alias please='sudo'
+alias df='df -Th'
 
 xhost +local:root >/dev/null 2>&1
 
@@ -96,14 +119,8 @@ complete -cf sudo
 # it regains control.  #65623
 # http://cnswww.cns.cwru.edu/~chet/bash/FAQ (E11)
 shopt -s checkwinsize
-
 shopt -s expand_aliases
-
-# export QT_SELECT=4
-
-# Enable history appending instead of overwriting.  #139609
 shopt -s histappend
-
 shopt -s extglob
 
 extract() {
@@ -230,12 +247,41 @@ gitblame() {
 	cd "$dir"
 }
 
-export PATH="${HOME}/.local/bin:$PATH"
-source ~/pureline/pureline ~/.pureline.conf
-export VISUAL=vim
-export EDITOR="$VISUAL"
-export HISTSIZE=-1
-export HISTFILESIZE=-1
-export HISTCONTROL="ignoreboth:erasedups"
+case ${TERM} in
+xterm* | rxvt* | Eterm* | aterm | kterm | gnome* | interix | konsole*)
+        [[ -f ~/.pureline.conf ]] && source ~/.pureline/pureline ~/.pureline.conf
+        ;;
+esac
+
+# Preserve MANPATH if you already defined it somewhere in your config.
+# Otherwise, fall back to `manpath` so we can inherit from `/etc/manpath`.
+export MANPATH="${MANPATH-$(manpath)}:$NPM_PACKAGES/share/man"
+
+NPM_PACKAGES="${HOME}/.npm-packages"
+export PATH="$PATH:$NPM_PACKAGES/bin"
+
+export GOPATH="${HOME}/.go"
+export PATH="$PATH:$GOPATH"
+
+[[ -f /opt/asdf-vm/asdf.sh ]] && . /opt/asdf-vm/asdf.sh
 
 export GPG_TTY=$(tty)
+
+if command -v pyenv >/dev/null; then
+                export PYENV_ROOT="$HOME/.pyenv"
+                [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init -)"
+fi
+
+# pnpm
+export PNPM_HOME="${HOME}/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Load Angular CLI autocompletion.
+if command -v ng >/dev/null; then
+        source <(ng completion script)
+fi
