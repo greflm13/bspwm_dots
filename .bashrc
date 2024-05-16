@@ -22,7 +22,7 @@ export HISTCONTROL="erasedups"
 
 [[ -f ~/.colorscripts ]] && source ~/.colorscripts
 
-if [[ ${EUID} == 0 ]]; then
+if [[ ${EUID} != 0 ]]; then
 	if command -v "uwufetch" >/dev/null; then
 		uwufetch
 	elif command -v "rsfetch" >/dev/null; then
@@ -36,10 +36,8 @@ if [[ ${EUID} == 0 ]]; then
 	elif command -v "screenfetch" >/dev/null; then
 		screenfetch
 	fi
+	[[ -f ~/.colorscripts ]] && colorpanes
 fi
-
-[[ -f ~/.colorscripts ]] && colorpanes
-
 
 [ -r /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
 
