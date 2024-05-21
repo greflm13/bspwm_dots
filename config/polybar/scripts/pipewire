@@ -36,7 +36,12 @@ switch-sink() {
                 done
                 current_vol=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
                 current_mute=$(wpctl get-volume $chosenid | awk '{print $3}' | head -n1)
-                setting="$(echo -e "change volume: $current_vol\ntoggle mute: $current_mute\nset default sink" | $dmenu_command -l 3 -p "Settings for $chosen")"
+                current_default=$(wpctl status | sed '0,/Settings/d' | sed '$d' | sed -s 's/\*//g' | grep "Sink" | awk '{print $3}')
+                is_default=""
+                if [[ $current_default == $(wpctl inspect $chosenid | grep node.name | sed -s 's/^[^"]*"//g' | sed -s 's/"//g') ]]; then
+                    is_default="[default]"
+                fi
+                setting="$(echo -e "change volume: $current_vol\ntoggle mute: $current_mute\nset default sink: $is_default" | $dmenu_command -l 3 -p "Settings for $chosen")"
 
                 case $setting in
                     "change volume: $current_vol")
@@ -48,7 +53,7 @@ switch-sink() {
                         wpctl set-mute $chosenid toggle
                         exit
                         ;;
-                    "set default sink")
+                    "set default sink: $is_default")
                         wpctl set-default $chosenid
                         exit
                         ;;
