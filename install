@@ -80,15 +80,34 @@ bashrc() {
 }
 
 wallpaper() {
-    echo "set wallpaper? [Y/n]"
     while true; do
+        echo -n "set wallpaper? [Y/n] "
         read -r answer
         if [[ $answer == "y" || $answer == "Y" || $answer == "" ]]; then
-            mkdir -p "${HOME}"/Pictures/Wallpaper
-            cp Wallpaper/bspwm.png "${HOME}"/Pictures/Wallpaper/bspwm.png
-            feh --bg-fill "${HOME}"/Pictures/Wallpaper/bspwm.png
+            while true; do
+                echo -n "set custom wallpaper? [y/N] "
+                read -r custom
+                if [[ $custom == "y" || $custom == "Y" ]]; then
+                    while true; do
+                        echo -n "enter custom wallpaper path: "
+                        read -r path
+                        mkdir -p "${HOME}"/Pictures/Wallpaper
+                        cp "$path" "${HOME}"/Pictures/Wallpaper/"$(basename "${path}")"
+                        feh --bg-fill "${HOME}"/Pictures/Wallpaper/"$(basename "${path}")" || continue
+                        echo "Setting wallpaper $(basename "${path}")"
+                        break
+                    done
+                    break
+                elif [[ $custom == "n" || $custom == "N" || $custom == "" ]]; then
+                    echo "Setting default wallpaper"
+                    mkdir -p "${HOME}"/Pictures/Wallpaper
+                    cp Wallpaper/bspwm.png "${HOME}"/Pictures/Wallpaper/bspwm.png
+                    feh --bg-fill "${HOME}"/Pictures/Wallpaper/bspwm.png
+                    break
+                fi
+            done
             break
-        else
+        elif [[ $answer == "n" || $answer == "N" ]]; then
             break
         fi
     done
@@ -193,11 +212,11 @@ setconfig() {
 
 automount() {
     sudo install -D udev/media-automount /bin/media-automount
-	sudo install -D udev/umount_dmenu /bin/umount_dmenu
-	sudo install -Dm644 udev/media-automount.rules /lib/udev/rules.d/99-media-automount.rules
-	sudo install -Dm644 udev/media-automount@.service /lib/systemd/system/media-automount@.service
-	sudo install -d /etc/media-automount.d
-	sudo install -Cm644 udev/media-automount.d/* /etc/media-automount.d/
+    sudo install -D udev/umount_dmenu /bin/umount_dmenu
+    sudo install -Dm644 udev/media-automount.rules /lib/udev/rules.d/99-media-automount.rules
+    sudo install -Dm644 udev/media-automount@.service /lib/systemd/system/media-automount@.service
+    sudo install -d /etc/media-automount.d
+    sudo install -Cm644 udev/media-automount.d/* /etc/media-automount.d/
     sudo udevadm control --reload-rules
     sudo udevadm trigger
 }
@@ -208,18 +227,24 @@ main() {
     wallpaper
     color
     setconfig
-    automount
+    # automount
 }
 
 case $1 in
-    "")
-        main
-        ;;
-    "colorswitch")
-        color
-        ;;
-    *)
-        echo "usage: install [colorswitch]"
-        exit 1
-        ;;
+"")
+    main
+    ;;
+"colorswitch")
+    color
+    ;;
+"automount")
+    automount
+    ;;
+"wallpaper")
+    wallpaper
+    ;;
+*)
+    echo "usage: install [colorswitch]"
+    exit 1
+    ;;
 esac
