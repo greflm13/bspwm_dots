@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 picom &
 
@@ -14,13 +14,14 @@ numlockx on
 
 autorandr -c --force
 
-sorted=$(xrandr -q | grep '\bconnected' | sed 's/primary//' | awk '{print $3}' | sed 's/.*+\(.*\)+.*/\1/' | sort)
-num=$(xrandr --query | grep -c '\bconnected')
+sorted=$(xrandr -q | grep -E '\bconnected [[:digit:]]{1,4}x' | sed 's/primary//' | awk '{print $3}' | sed 's/.*+\(.*\)+.*/\1/' | sort)
+inactive=$(xrandr -q | grep -E '\bconnected ([[:alpha:]]+|\()' | sed 's/primary//' | awk '{print $1}' | sort)
+num=$(xrandr --query | grep -cE '\bconnected [[:digit:]]{1,4}')
 if [ "$num" -eq "4" ]; then
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '1p')"+ | awk '{print $1}')" -d 1 2 3
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '2p')"+ | awk '{print $1}')" -d 4 5 6
-    bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '1p')"+ | awk '{print $1}')" -d 7 8 9
-    bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '1p')"+ | awk '{print $1}')" -d 10 11 12
+    bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '3p')"+ | awk '{print $1}')" -d 7 8 9
+    bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '4p')"+ | awk '{print $1}')" -d 10 11 12
 elif [ "$num" -eq "3" ]; then
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '1p')"+ | awk '{print $1}')" -d 1 2 3 4
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '2p')"+ | awk '{print $1}')" -d 5 6 7 8
@@ -32,6 +33,10 @@ else
     bspc monitor -d 1 2 3 4 5 6 7 8 9 10 11 12
 fi
 
+for display in $inactive; do
+    bspc monitor "$display" -r
+done
+
 ~/.config/polybar/run.sh &
 
 ~/.fehbg &
@@ -41,6 +46,8 @@ dunst --config ~/.config/dunst/dunstrc &
 ~/.config/bspwm/lockscreen &
 
 ~/.config/bspwm/bspwm_workspaces.sh &
+
+polkit-dumb-agent &
 
 # window gaps and width
 bspc config border_width 0
@@ -52,3 +59,11 @@ bspc config borderless_monocle true
 bspc config gapless_monocle false
 bspc config focus_follows_pointer true
 bspc config pointer_follows_focus true
+
+bspc rule -a plasma-emojier state=floating
+
+if [[ $(uptime | awk -F'( |,|:)+' '{d=h=m=0; if ($7=="min") m=$6; else {if ($7~/^day/) {d=$6;h=$8;m=$9} else {h=$6;m=$7}}} {print d+0,"days,",h+0,"hours,",m+0,"minutes."}' | awk '{print $3}') -eq 0 ]]; then
+    if [[ $(autorandr | grep detected | awk '{print $1}') == *"dock" ]]; then
+        ~/.config/bspwm/autostart &
+    fi
+fi
