@@ -30,9 +30,9 @@
     # The width can be negative.  In this case the actual width is the
     # screen width minus the width defined in within the geometry option.
     width = 300
-    height = 600
+    height = (0, 300)
     origin = top-right
-    offset = 12x12
+    offset = (12, 12)
 
     # Show how many messages are currently hidden (because of geometry).
     indicate_hidden = yes
@@ -62,7 +62,7 @@
     frame_width = 2
 
     # Defines color of the frame around the notification window.
-    frame_color = "#08090c"
+    frame_color = "#e53947"
 
     # Define a color for the separator.
     # possible values are:
@@ -172,7 +172,7 @@
     sticky_history = yes
 
     # Maximum amount of notifications kept in history
-    history_length = 20
+    history_length = 100
 
     ### Misc/Advanced ###
 
@@ -222,6 +222,8 @@
     mouse_left_click = close_current
     mouse_middle_click = do_action
     mouse_right_click = close_all
+    
+    ignore_dbusclose = true
 
 # Experimental features that may or may not work correctly. Do not expect them
 # to have a consistent behaviour across releases.
@@ -252,7 +254,7 @@
 [urgency_critical]
     background = "#16171d"
     foreground = "#f6f6f6"
-    frame_color = "#ff3f4f"
+    frame_color = "#e53947"
     timeout = 10
     # Icon for notifications with critical urgency, uncomment to enable
     #icon = /path/to/icon
@@ -372,4 +374,4 @@
 #    appname = "some_volume_notifiers"
 #    set_stack_tag = "volume"
 #
-# vim: filetypet=cfg
+# vim: filetype=cfg
