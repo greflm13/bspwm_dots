@@ -1,15 +1,15 @@
 #!/bin/bash
 
 interface=$(ip route get 1.1.1.1 2>/dev/null | head -n1 | awk '{print $5}')
-previousRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes")
-previousTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes")
+previousRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes" 2>/dev/null)
+previousTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes" 2>/dev/null)
 
 while true; do
     sleep 1 &
     interface=$(ip route get 1.1.1.1 2>/dev/null | head -n1 | awk '{print $5}')
 
-    currentRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes")
-    currentTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes")
+    currentRX=$(cat "/sys/class/net/${interface}/statistics/rx_bytes" 2>/dev/null)
+    currentTX=$(cat "/sys/class/net/${interface}/statistics/tx_bytes" 2>/dev/null)
 
     if [[ $interface != "" ]]; then
         RX=$(echo $((currentRX - previousRX)) | numfmt --to=iec --padding=5)

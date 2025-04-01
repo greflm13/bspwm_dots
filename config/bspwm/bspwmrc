@@ -14,9 +14,9 @@ numlockx on
 
 autorandr -c --force
 
-sorted=$(xrandr -q | grep -E '\bconnected [[:digit:]]{1,4}x' | sed 's/primary//' | awk '{print $3}' | sed 's/.*+\(.*\)+.*/\1/' | sort)
-inactive=$(xrandr -q | grep -E '\bconnected ([[:alpha:]]+|\()' | sed 's/primary//' | awk '{print $1}' | sort)
-num=$(xrandr --query | grep -cE '\bconnected [[:digit:]]{1,4}')
+sorted=$(xrandr -q | grep -E '\bconnected( primary)? [[:digit:]]{1,4}x' | sed 's/primary//' | awk '{print $3}' | sed 's/.*+\(.*\)+.*/\1/' | sort)
+inactive=$(xrandr -q | grep -E '\bconnected(!? primary) ([[:alpha:]]+|\()' | sed 's/primary//' | awk '{print $1}' | sort)
+num=$(xrandr --query | grep -cE '\bconnected( primary)? [[:digit:]]{1,4}')
 if [ "$num" -eq "4" ]; then
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '1p')"+ | awk '{print $1}')" -d 1 2 3
     bspc monitor "$(xrandr -q | grep '\bconnected' | grep +"$(echo "$sorted" | sed -n '2p')"+ | awk '{print $1}')" -d 4 5 6
