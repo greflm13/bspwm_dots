@@ -170,15 +170,15 @@ print_status() {
             if device_connected "$device"; then
                 device_alias=$(bluetoothctl info "$device" | grep "Alias" | cut -d ' ' -f 2-)
                 battery=$(bluetoothctl info "$device" | grep "Battery Percentage" | cut -d ' ' -f 4- | grep -o '[0-9]*')
-                sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sources/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+                sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sink endpoints/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
                 for id in $sinkids; do
-                    pipewire_sinkname=$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')
+                    pipewire_sinkname=$(wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')
                     if [[ "$device_alias" == "$pipewire_sinkname" || "LE_$device_alias" == "$pipewire_sinkname" || "$device_alias" == "LE_$pipewire_sinkname" ]]; then
                         chosenid=$id
                     fi
                 done
                 if [[ -n $chosenid ]]; then
-                    volume=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+                    volume=$(echo "$(wpctl get-volume "$chosenid" | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
                 fi
 
 
@@ -271,7 +271,7 @@ show_menu() {
     fi
 
     # Open dmenu menu, read chosen option
-    linecount=$(expr $(printf "%s\n" "$options" | wc -l) + 5)
+    linecount=$(( $(printf "%s\n" "$options" | wc -l) + 5 ))
     chosen="$(echo -e "$options" | $dmenu_command -l "$linecount" -p "Bluetooth")"
 
     # Match chosen option to command
@@ -308,7 +308,7 @@ set_volume() {
 
     for device in "${paired_devices[@]}"; do
         if device_connected "$device"; then
-            dbus-send --system --print-reply --dest=org.bluez /org/bluez/hci0/dev_${device//:/_} org.bluez.MediaControl1.$1 >/dev/null
+            dbus-send --system --print-reply --dest=org.bluez /org/bluez/hci0/dev_"${device//:/_}" org.bluez.MediaControl1."$1" >/dev/null
         fi
     done
 
@@ -343,13 +343,13 @@ loop_status() {
         curr_inf=$(bluetoothctl info 2>/dev/null | grep Battery)
         curr_pow=$(bluetoothctl show | grep Powered)
         curr_con=$(bluetoothctl devices Connected)
-        if [[ $curr_pow != $power ]]; then
+        if [[ $curr_pow != "$power" ]]; then
             power=$curr_pow
             print_status
-        elif [[ $curr_inf != $info ]]; then
+        elif [[ $curr_inf != "$info" ]]; then
             info=$curr_inf
             print_status
-        elif [[ $curr_con != $connected ]]; then
+        elif [[ $curr_con != "$connected" ]]; then
             connected=$curr_con
             print_status
         fi
@@ -359,7 +359,7 @@ loop_status() {
 
 pactl_subscribe() {
    pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink " | {
-       while read line; do
+       while read -r line; do
            {
                print_status
             }
@@ -372,7 +372,7 @@ case "$1" in
         loop_status
         ;;
     --volume)
-        volume $@
+        volume "$@"
         ;;
     *)
         show_menu
