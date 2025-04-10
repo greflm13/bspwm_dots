@@ -9,16 +9,11 @@ VOLUMESTEP=0.02
 MICROPHONE=""
 MICROPHONEMUTE=""
 
-# Run `pw-play --list-targets` for a list of sink names.
-ignored_sinks=(
-    "PulseEffects Sink"
-)
-
 dmenu_command="dmenu -i -nb #08090c -nf #f6f6f6 -sb #3e4451 -sf #f6f6f6"
 
 switch-sink() {
-    sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sources/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g') $(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Filters/d' | sed '/Streams/,$d' | sed '$d' | sed -s 's/\*//g' | grep "Sink" | awk '{print $2}' | sed -s 's/\.//g')"
-    names="$(for id in $sinkids; do wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
+    sinkids="$(wpctl status | awk '/^Audio/,/^$/' | awk '/^ ├─ Sinks:/ {found=1; next} /^ │\s+$/ {found=0} found' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g') $(wpctl status | awk '/^Audio/,/^$/' | awk '/^ ├─ Filters:/ {found=1; next} /^ │\s+$/ {found=0} found' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+    names="$(for id in $sinkids; do wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
 
     while true; do
         chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$names" | wc -l)" -p "Audio Device")"
@@ -30,15 +25,15 @@ switch-sink() {
                 ;;
             *)
                 for id in $sinkids; do
-                    if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                    if [[ "$chosen" == "$(wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
                         chosenid=$id
                     fi
                 done
-                current_vol=$(echo "$(wpctl get-volume $chosenid | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
-                current_mute=$(wpctl get-volume $chosenid | awk '{print $3}' | head -n1)
-                current_default=$(wpctl status | sed '0,/Settings/d' | sed '$d' | sed -s 's/\*//g' | grep "Sink" | awk '{print $3}')
+                current_vol=$(echo "$(wpctl get-volume "$chosenid" | awk '{print $2}' | head -n1) * 100" | bc | sed -s "s/\.00//g")
+                current_mute=$(wpctl get-volume "$chosenid" | awk '{print $3}' | head -n1)
+                current_default=$(wpctl status | awk '/^Settings/,/^$/' | sed -s 's/\*//g' | grep "Sink" | awk '{print $3}')
                 is_default=""
-                if [[ $current_default == $(wpctl inspect $chosenid | grep node.name | sed -s 's/^[^"]*"//g' | sed -s 's/"//g') ]]; then
+                if [[ $current_default == $(wpctl inspect "$chosenid" | grep node.name | sed -s 's/^[^"]*"//g' | sed -s 's/"//g') ]]; then
                     is_default="[default]"
                 fi
                 setting="$(echo -e "change volume: $current_vol\ntoggle mute: $current_mute\nset default sink: $is_default" | $dmenu_command -l 3 -p "Settings for $chosen")"
@@ -46,15 +41,15 @@ switch-sink() {
                 case $setting in
                     "change volume: $current_vol")
                         volume="$(echo "" | $dmenu_command -p "Current Volume: $current_vol")"
-                        [[ "$volume" =~ ^[0-9]{1,3}$ ]] && wpctl set-volume $chosenid "$volume"%
+                        [[ "$volume" =~ ^[0-9]{1,3}$ ]] && wpctl set-volume "$chosenid" "$volume"%
                         exit
                         ;;
                     "toggle mute: $current_mute")
-                        wpctl set-mute $chosenid toggle
+                        wpctl set-mute "$chosenid" toggle
                         exit
                         ;;
                     "set default sink: $is_default")
-                        wpctl set-default $chosenid
+                        wpctl set-default "$chosenid"
                         exit
                         ;;
                     *)
@@ -67,8 +62,8 @@ switch-sink() {
 }
 
 switch-mic() {
-    micids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sources/d' | sed '/Filters/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
-    names="$(for id in $micids; do wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
+    micids="$(wpctl status | awk '/^Audio/,/^$/' | awk '/^ ├─ Sources:/ {found=1; next} /^ │\s+$/ {found=0} found' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+    names="$(for id in $micids; do wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g'; done)"
 
     chosen="$(echo -e "$names" | $dmenu_command -l "$(echo "$micids" | wc -l)" -p "Microphone")"
 
@@ -78,11 +73,11 @@ switch-mic() {
             ;;
         *)
             for id in $micids; do
-                if [[ "$chosen" == "$(wpctl inspect $id | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
+                if [[ "$chosen" == "$(wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')" ]]; then
                     chosenid=$id
                 fi
             done
-            wpctl set-default $chosenid
+            wpctl set-default "$chosenid"
             ;;
     esac
 }
@@ -142,7 +137,7 @@ case $action in
     "mic-status")
         mic-status
         pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on source" | {
-            while read line; do
+            while read -r; do
                 {
                     mic-status
                 }
@@ -153,7 +148,7 @@ case $action in
         output
         #pactl subscribe 2>/dev/null
         pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink" | {
-            while read line; do
+            while read -r; do
                 {
                     output
                 }

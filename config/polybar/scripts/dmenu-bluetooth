@@ -359,7 +359,7 @@ loop_status() {
 
 pactl_subscribe() {
    pactl subscribe 2>/dev/null | grep --line-buffered "Event 'change' on sink " | {
-       while read -r line; do
+       while read -r; do
            {
                print_status
             }
@@ -372,7 +372,7 @@ case "$1" in
         loop_status
         ;;
     --volume)
-        volume $@
+        volume "$@"
         ;;
     *)
         show_menu
