@@ -170,7 +170,7 @@ print_status() {
             if device_connected "$device"; then
                 device_alias=$(bluetoothctl info "$device" | grep "Alias" | cut -d ' ' -f 2-)
                 battery=$(bluetoothctl info "$device" | grep "Battery Percentage" | cut -d ' ' -f 4- | grep -o '[0-9]*')
-                sinkids="$(wpctl status | sed '0,/Audio/d' | sed '/Video/,$d' | sed '0,/Sinks/d' | sed '/Sink endpoints/,$d' | sed '$d' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
+                sinkids="$(wpctl status | awk '/^Audio/,/^$/' | awk '/^ ├─ Sinks:/ {found=1; next} /^ │\s+$/ {found=0} found' | sed -s 's/\*//g' | awk '{print $2}' | sed -s 's/\.//g')"
                 for id in $sinkids; do
                     pipewire_sinkname=$(wpctl inspect "$id" | grep node.description | sed -s 's/^[^"]*"//g' | sed -s 's/"//g')
                     if [[ "$device_alias" == "$pipewire_sinkname" || "LE_$device_alias" == "$pipewire_sinkname" || "$device_alias" == "LE_$pipewire_sinkname" ]]; then
